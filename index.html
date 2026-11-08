@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IoT Flashcards 🌟</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: #fdf2f8; /* Soft pink background */
+            background-image: radial-gradient(#fbcfe8 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        /* 3D Flip Card Styles */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        
+        .transform-style-3d {
+            transform-style: preserve-3d;
+        }
+        
+        .backface-hidden {
+            backface-visibility: hidden;
+        }
+        
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+
+        .transition-transform {
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+        }
+
+        /* Card Faces */
+        .card-front {
+            background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+            border: 4px solid #86efac;
+        }
+
+        .card-back {
+            background: linear-gradient(135deg, #ffffff 0%, #fff7ed 100%);
+            border: 4px solid #fdba74;
+            transform: rotateY(180deg);
+        }
+
+        /* Button hover animations */
+        .btn-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .btn-hover:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <h1 class="text-4xl md:text-5xl font-bold text-pink-500 mb-2 drop-shadow-sm">
+            ✨ IoT Flashcards ✨
+        </h1>
+        <p class="text-gray-600 text-lg">แตะที่การ์ดเพื่อดูคำตอบ</p>
+    </div>
+
+    <!-- Flashcard Container -->
+    <div class="w-full max-w-lg aspect-[4/3] md:aspect-[3/2] perspective-1000 cursor-pointer group" onclick="flipCard()" id="card-container">
+        <div id="card-inner" class="relative w-full h-full transform-style-3d transition-transform rounded-3xl shadow-xl group-hover:shadow-2xl">
+            
+            <!-- Front of Card -->
+            <div class="absolute w-full h-full backface-hidden card-front rounded-3xl p-6 md:p-8 flex flex-col justify-center items-center text-center">
+                <div class="absolute top-4 right-4 text-4xl opacity-20">❓</div>
+                <h2 id="front-text" class="text-2xl md:text-3xl font-semibold text-gray-800 mb-6 leading-relaxed">
+                    <!-- Text injected by JS -->
+                </h2>
+                <div id="hint-text" class="text-emerald-600 bg-emerald-50 px-4 py-2 rounded-full text-sm md:text-base border border-emerald-200 mt-auto">
+                    <!-- Hint injected by JS -->
+                </div>
+            </div>
+
+            <!-- Back of Card -->
+            <div class="absolute w-full h-full backface-hidden card-back rounded-3xl p-6 md:p-8 flex flex-col justify-center items-center text-center">
+                <div class="absolute top-4 right-4 text-4xl opacity-20">💡</div>
+                <div class="text-orange-500 font-bold mb-4 text-lg">คำตอบ</div>
+                <p id="back-text" class="text-xl md:text-2xl font-medium text-gray-700 leading-relaxed">
+                    <!-- Text injected by JS -->
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="w-full max-w-lg mt-8 flex justify-between items-center bg-white p-4 rounded-2xl shadow-md border border-gray-100">
+        <button onclick="prevCard()" id="btn-prev" class="btn-hover bg-pink-100 text-pink-600 px-6 py-3 rounded-xl font-semibold flex items-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+            </svg>
+            ก่อนหน้า
+        </button>
+
+        <div class="font-bold text-gray-500 text-lg bg-gray-50 px-4 py-2 rounded-lg" id="counter">
+            1 / 10
+        </div>
+
+        <button onclick="nextCard()" id="btn-next" class="btn-hover bg-pink-500 text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 transition-all shadow-md shadow-pink-200 disabled:opacity-50 disabled:cursor-not-allowed">
+            ถัดไป
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+            </svg>
+        </button>
+    </div>
+
+    <!-- Keyboard shortcut hint -->
+    <p class="mt-6 text-gray-400 text-sm hidden md:block">
+        ⌨️ เคล็ดลับ: ใช้ปุ่มลูกศรซ้าย-ขวา เพื่อเปลี่ยนการ์ด และปุ่ม Spacebar เพื่อพลิกการ์ด
+    </p>
+
+    <script>
+        const flashcards = [
+            {
+                front: "ความหมายของ Internet of Things (IoT)",
+                back: "เทคโนโลยีที่เชื่อมโยงอุปกรณ์ต่าง ๆ เข้ากับอินเทอร์เน็ต ทำให้อุปกรณ์สามารถรับส่งข้อมูลและสั่งการทำงานร่วมกันได้โดยอัตโนมัติ",
+                hint: "การเชื่อมต่ออุปกรณ์ผ่านอินเทอร์เน็ตเพื่อทำงานร่วมกัน"
+            },
+            {
+                front: "ความสำคัญของเทคโนโลยี IoT",
+                back: "ช่วยลดภาระงานของมนุษย์ และทำให้สามารถเข้าถึงข้อมูลได้แบบเรียลไทม์ทุกที่ทุกเวลา",
+                hint: "ลดงานคน, ดูข้อมูลเรียลไทม์"
+            },
+            {
+                front: "องค์ประกอบหลัก 4 อย่างของระบบ IoT",
+                back: "1. อุปกรณ์และเซนเซอร์\n2. การเชื่อมต่อเครือข่าย\n3. การประมวลผลข้อมูล\n4. แอปพลิเคชันและส่วนแสดงผล",
+                hint: "รับข้อมูล -> ส่ง -> คิด -> แสดงผล"
+            },
+            {
+                front: "หน้าที่ของเซนเซอร์ (Sensor) ในระบบ IoT",
+                back: "ตรวจวัดสภาพแวดล้อม เช่น อุณหภูมิ แสง และความชื้น เพื่อนำข้อมูลไปใช้ในการประมวลผล",
+                hint: "เป็นตัวรับรู้และตรวจจับข้อมูลจากสิ่งแวดล้อม"
+            },
+            {
+                front: "ขั้นตอนการทำงานของระบบ IoT",
+                back: "เริ่มจากเซนเซอร์ตรวจจับข้อมูล ส่งข้อมูลผ่านเครือข่ายไปประมวลผล จากนั้นแสดงผลหรือสั่งให้อุปกรณ์ทำงานตามเงื่อนไขที่กำหนด",
+                hint: "ตรวจจับ -> ส่งผ่านเน็ต -> ประมวลผล -> สั่งการ"
+            },
+            {
+                front: "เทคโนโลยีการเชื่อมต่อที่นิยมใช้ในระบบ IoT",
+                back: "Wi-Fi, Bluetooth, Zigbee และ 4G/5G",
+                hint: "ระบบไร้สายรูปแบบต่างๆ"
+            },
+            {
+                front: "ความหมายและตัวอย่างของ Smart Farming",
+                back: "การนำ IoT มาใช้ในด้านการเกษตร เช่น เซนเซอร์วัดความชื้นในดินและระบบรดน้ำอัตโนมัติ ช่วยประหยัดน้ำและลดแรงงาน",
+                hint: "เกษตรอัจฉริยะ"
+            },
+            {
+                front: "ตัวอย่างการนำ IoT มาใช้ด้านการแพทย์และสุขภาพ",
+                back: "การใช้นาฬิกาอัจฉริยะวัดอัตราการเต้นของหัวใจ และเครื่องวัดความดัน เพื่อติดตามข้อมูลสุขภาพ",
+                hint: "อุปกรณ์สวมใส่ (Wearables) ที่ดูแลร่างกาย"
+            },
+            {
+                front: "ประโยชน์และข้อจำกัดของเทคโนโลยี IoT",
+                back: "ประโยชน์: เพิ่มความสะดวกสบาย ลดข้อผิดพลาด ช่วยตัดสินใจด้วยข้อมูลเรียลไทม์\nข้อจำกัด: ต้นทุนเริ่มต้นสูง ต้องพึ่งพาไฟฟ้าและอินเทอร์เน็ต",
+                hint: "ข้อดี (สะดวก) vs ข้อเสีย (ต้นทุน, พึ่งพาเน็ต)"
+            },
+            {
+                front: "ความเสี่ยงด้านความปลอดภัยของเทคโนโลยี IoT",
+                back: "อุปกรณ์อาจถูกแฮ็ก ทำให้ข้อมูลส่วนบุคคลหรือข้อมูลพฤติกรรมการใช้งานถูกเข้าถึงโดยไม่ได้รับอนุญาต",
+                hint: "การถูกเจาะระบบและข้อมูลรั่วไหล"
+            }
+        ];
+
+        let currentIndex = 0;
+        let isFlipped = false;
+
+        const cardInner = document.getElementById('card-inner');
+        const frontText = document.getElementById('front-text');
+        const hintText = document.getElementById('hint-text');
+        const backText = document.getElementById('back-text');
+        const counter = document.getElementById('counter');
+        const btnPrev = document.getElementById('btn-prev');
+        const btnNext = document.getElementById('btn-next');
+
+        function updateCardDisplay() {
+            // Apply text
+            frontText.textContent = flashcards[currentIndex].front;
+            hintText.innerHTML = `💡 <b>คำใบ้:</b> ${flashcards[currentIndex].hint}`;
+            
+            // Handle line breaks for back text
+            backText.innerHTML = flashcards[currentIndex].back.replace(/\n/g, '<br>');
+            
+            // Update counter
+            counter.textContent = `${currentIndex + 1} / ${flashcards.length}`;
+
+            // Update button states
+            btnPrev.disabled = currentIndex === 0;
+            btnNext.disabled = currentIndex === flashcards.length - 1;
+        }
+
+        function flipCard() {
+            isFlipped = !isFlipped;
+            if (isFlipped) {
+                cardInner.classList.add('rotate-y-180');
+            } else {
+                cardInner.classList.remove('rotate-y-180');
+            }
+        }
+
+        function changeCard(newIndex) {
+            if (newIndex >= 0 && newIndex < flashcards.length) {
+                if (isFlipped) {
+                    // Unflip first, wait for animation, then change text
+                    flipCard();
+                    setTimeout(() => {
+                        currentIndex = newIndex;
+                        updateCardDisplay();
+                    }, 300); // Half of the CSS transition time for a smooth effect
+                } else {
+                    // Not flipped, change immediately
+                    currentIndex = newIndex;
+                    updateCardDisplay();
+                }
+            }
+        }
+
+        function nextCard() {
+            // Stop event bubbling if clicking button
+            if (event) event.stopPropagation();
+            changeCard(currentIndex + 1);
+        }
+
+        function prevCard() {
+            if (event) event.stopPropagation();
+            changeCard(currentIndex - 1);
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') {
+                nextCard();
+            } else if (e.key === 'ArrowLeft') {
+                prevCard();
+            } else if (e.key === ' ' || e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+                e.preventDefault(); // Prevent page scroll on spacebar
+                flipCard();
+            }
+        });
+
+        // Initialize first card
+        updateCardDisplay();
+
+    </script>
+</body>
+</html>
